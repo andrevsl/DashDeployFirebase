@@ -4,26 +4,26 @@ $ gcloud config set account $MY_EMAIL_ADDRESS
 $ gcloud auth login $MY_EMAIL_ADDRESS
 $ gcloud config set project $MY_PROJECT_ID
 
+
 # Setup GCP account
 $ gcloud config set account andrevsl@gmail.com
 $ gcloud auth login andrevsl@gmail.com
 $ gcloud config set project flaskdeployfirebase
 
-
+docker run -d -p 5000:5000 gcr.io/flaskdeployfirebase/flaskapp_cr:v1
 
 CMD exec gunicorn --bind :$PORT main_v1:app --workers 1 --threads 1 --timeout 60
-
-CMD ["exec", "gunicorn"]
+CMD ["gunicorn"  , "--bind", "0.0.0.0:5000", "main_v1:app"]
 
 # Build Docker on your local machine
 $ docker build -t gcr.io/$MY_PROJECT_ID/flaskapp_cr:v1 -f Dockerfile .
 
-$ docker build -t gcr.io/flaskdeployfirebase/flaskapp_cr:v1 -f Dockerfile .
+$ docker build -t gcr.io/flaskdeployfirebase/flaskapp_cr:v2 -f Dockerfile .
 
 # Push the Docker image to Container Registry 
 $ docker push gcr.io/$MY_PROJECT_ID/flaskapp_cr:v1
 
-$ docker push gcr.io/flaskdeployfirebase/flaskapp_cr:v1
+$ docker push gcr.io/flaskdeployfirebase/flaskapp_cr:v2
 
 
 
@@ -31,11 +31,20 @@ gcloud auth activate-service-account ACCOUNT --key-file=KEY-FILE  4a83d0ff8859ff
 gcloud auth activate-service-account 1079705010275-compute@developer.gserviceaccount.com	--key-file=flaskdeployfirebase-4a83d0ff8859.json
 
 # Deploy a Docker image on Cloud Run
-gcloud run deploy flaskapp-cr-v1 --image gcr.io/flaskdeployfirebase/flaskapp_cr:v1 --region us-east1 
+gcloud run deploy flaskapp-cr-v2 --image gcr.io/flaskdeployfirebase/flaskapp_cr:v2 --region us-east1 
+gcloud run deploy flaskapp-cr-v2 --image gcr.io/flaskdeployfirebase/flaskapp_cr:v2 --region us-east1 --no-allow-unauthenticated
 --platform managed --memory 128Mi
 
+docker run -d -p 5000:5000 gcr.io/flaskdeployfirebase/flaskapp_cr:v1
 
-PORT=8080 && docker run -p 9090:${PORT} -e PORT=${PORT}  LOCATION-docker.pkg.dev/PROJECT_ID/REPO_NAME/PATH:v1
 
-PORT=8080 && docker run -p 9090:${PORT} -e PORT=${PORT} us-east1-docker.pkg.dev/flaskdeployfirebase/flaskapp_cr/gcr.io/flaskdeployfirebase/flaskapp_cr@sha256:649b7c642f5271169a010514cf81b527a735a3ff879249d14e75fc0c59d783b4:v1
-gcloud auth configure-docker us-east1-docker.pkg.dev
+gcloud run deploy CLOUD_RUN_SERVICE_NAME \
+    --image="gcr.io/cloudrun/hello" \
+    --allow-unauthenticated \
+    --platform managed \
+    --project=ESP_PROJECT_ID
+
+gcloud run deploy flaskapp-cr-v2-gateway --image "gcr.io/endpoints-release/endpoints-runtime-serverless:2.17.0" --allow-unauthenticated --platform managed --project flaskdeployfirebase --region us-east1
+
+
+gcloud endpoints services deploy cloud_endpoint_config.yaml --project=flaskdeployfirebase

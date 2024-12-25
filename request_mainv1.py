@@ -2,8 +2,13 @@
 Send a request to flask application
 """
 import requests
+import urllib3  
+# or if this does not work with the previous import:
+# from requests.packages import urllib3  
 
-url = "https://flaskapp-cr-v1-yerjarnciq-ue.a.run.app"
+# Suppress only the single warning from urllib3.
+urllib3.disable_warnings(category=urllib3.exceptions.InsecureRequestWarning)
+url = "https://flaskapp-cr-v2-1079705010275.us-east1.run.app"
 
 # Method 1
 resp = requests.get(f"{url}/hello", verify=False)
