@@ -48,3 +48,12 @@ gcloud run deploy flaskapp-cr-v2-gateway --image "gcr.io/endpoints-release/endpo
 
 
 gcloud endpoints services deploy cloud_endpoint_config.yaml --project=flaskdeployfirebase
+
+./gcloud_build_image -s $ENDPOINT_HOST -c $CONFIG_ID -p $MY_PROJECT_ID
+
+./gcloud_build_image -s flaskapp-cr-v2-gateway-1079705010275.us-east1.run.app -c 2024-12-25r1 -p flaskdeployfirebase
+
+gcloud run deploy flaskapp-cr-v2-gateway --image gcr.io/$MY_PROJECT_ID/endpoints-runtime-serverless:2.17.0-$ENDPOINT_HOST-$CONFIG_ID --allow-unauthenticated --platform managed --project $MY_PROJECT_ID --region us-east1
+
+
+gcloud run deploy flaskapp-cr-v2-gateway --image gcr.io/flaskdeployfirebase/endpoints-runtime-serverless:2.17.0-flaskapp-cr-v2-gateway-1079705010275.us-east1.run.app-2024-12-25r1 --allow-unauthenticated --platform managed --project flaskdeployfirebase --region us-east1
